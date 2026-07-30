@@ -1,11 +1,33 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Transaction, TransactionFilters } from "@/types/transaction";
 
-function monthRange(month: number, year: number) {
-  const start = `${year}-${String(month).padStart(2, "0")}-01`;
-  const endDate = new Date(Date.UTC(year, month, 0)).getUTCDate();
-  const end = `${year}-${String(month).padStart(2, "0")}-${String(endDate).padStart(2, "0")}`;
-  return { start, end };
+function pad(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+/** Resolve um intervalo de datas a partir de mês e/ou ano (ambos opcionais). */
+function dateRange(month?: number, year?: number) {
+  if (!month && !year) return null;
+
+  if (month && year) {
+    const lastDay = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    return {
+      start: `${year}-${pad(month)}-01`,
+      end: `${year}-${pad(month)}-${pad(lastDay)}`,
+    };
+  }
+
+  if (year) {
+    return { start: `${year}-01-01`, end: `${year}-12-31` };
+  }
+
+  // Apenas mês informado: assume o ano corrente.
+  const currentYear = new Date().getFullYear();
+  const lastDay = new Date(Date.UTC(currentYear, month!, 0)).getUTCDate();
+  return {
+    start: `${currentYear}-${pad(month!)}-01`,
+    end: `${currentYear}-${pad(month!)}-${pad(lastDay)}`,
+  };
 }
 
 export async function getTransactions(
@@ -19,9 +41,9 @@ export async function getTransactions(
     .order("date", { ascending: false })
     .order("created_at", { ascending: false });
 
-  if (filters.month && filters.year) {
-    const { start, end } = monthRange(filters.month, filters.year);
-    query = query.gte("date", start).lte("date", end);
+  const range = dateRange(filters.month, filters.year);
+  if (range) {
+    query = query.gte("date", range.start).lte("date", range.end);
   }
 
   if (filters.category) {
