@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Finanças Pessoais
 
-## Getting Started
+App de gestão financeira pessoal: registre receitas e despesas, categorize, veja um dashboard com resumo mensal e gráfico por categoria, filtre e exporte suas transações em CSV.
 
-First, run the development server:
+**Stack**: Next.js (App Router) + TypeScript + Tailwind CSS + shadcn/ui + Supabase (Auth + Postgres + Row Level Security) + Recharts.
+
+## Setup do Supabase
+
+O app precisa de um projeto Supabase com o schema do banco já criado. Siga os passos:
+
+1. Crie uma conta e um novo projeto em [supabase.com](https://supabase.com).
+2. No painel do projeto, abra **SQL Editor** → **New query**, cole o conteúdo de [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) e clique em **Run**. Isso cria a tabela `transactions`, os enums de tipo/categoria e as políticas de Row Level Security (cada usuário só enxerga suas próprias transações).
+3. Em **Project Settings → API**, copie a **Project URL** e a chave **anon public**.
+4. Copie `.env.example` para `.env.local` e preencha:
+
+   ```bash
+   cp .env.example .env.local
+   ```
+
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+   ```
+
+5. (Opcional) Em **Authentication → Providers → Email**, desative "Confirm email" durante o desenvolvimento para poder logar imediatamente após o cadastro sem precisar confirmar por e-mail.
+
+## Rodando localmente
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Estrutura do projeto
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+app/                    rotas (App Router)
+  (auth)/               login, cadastro
+  (app)/                área autenticada: dashboard, transações
+components/
+  ui/                   componentes shadcn/ui
+  layout/               sidebar, topbar
+  dashboard/            cards de resumo, gráfico de categorias
+  transactions/         formulário, tabela, filtros, exportação CSV
+lib/
+  supabase/             clients Supabase (browser/server) e helper do proxy
+  actions/              Server Actions (auth, transações)
+  categories.ts         categorias pré-definidas
+  csv.ts                exportação para CSV
+supabase/migrations/    schema SQL
+types/                  tipos TypeScript (Transaction, Database)
+proxy.ts                protege rotas autenticadas (equivalente ao middleware)
+```
 
-## Learn More
+## Deploy
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Veja a seção [Deploy na Vercel](#deploy-na-vercel) (adicionada ao final do desenvolvimento).
