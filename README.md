@@ -50,10 +50,21 @@ lib/
   categories.ts         categorias pré-definidas
   csv.ts                exportação para CSV
 supabase/migrations/    schema SQL
-types/                  tipos TypeScript (Transaction, Database)
+types/                  tipos TypeScript (Transaction)
 proxy.ts                protege rotas autenticadas (equivalente ao middleware)
 ```
 
-## Deploy
+## Deploy na Vercel
 
-Veja a seção [Deploy na Vercel](#deploy-na-vercel) (adicionada ao final do desenvolvimento).
+1. Suba o projeto para um repositório no GitHub (já feito, se você seguiu este guia com o Claude Code).
+2. Em [vercel.com](https://vercel.com), clique em **Add New → Project** e importe o repositório. A Vercel detecta automaticamente que é um projeto Next.js.
+3. Antes de clicar em **Deploy**, configure as variáveis de ambiente (**Environment Variables**) com os mesmos valores do seu `.env.local`:
+
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=https://xxxxxxxx.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+   ```
+
+4. Clique em **Deploy**. A build usa `next build` automaticamente; ao final você recebe uma URL pública (`https://seu-projeto.vercel.app`).
+5. **Importante**: no painel do Supabase, vá em **Authentication → URL Configuration** e adicione a URL da Vercel em **Site URL** e em **Redirect URLs**. Sem isso, fluxos de autenticação que dependem de redirecionamento (como confirmação de e-mail, se você reativar essa opção) não vão funcionar em produção.
+6. Deploys seguintes são automáticos: todo `git push` para a branch `main` dispara um novo deploy na Vercel (integração contínua via GitHub).
