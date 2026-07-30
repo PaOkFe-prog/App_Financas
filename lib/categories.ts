@@ -12,14 +12,17 @@ export const CATEGORIES: readonly TransactionCategory[] = [
   "Outros",
 ] as const;
 
+// Paleta categórica validada (CVD-safe) — ordem fixa, ver skill de dataviz.
+// "Outros" fica em cinza neutro por ser o "balde" de miscelânea, não uma
+// 9ª categoria concorrendo por matiz com as demais.
 export const CATEGORY_COLORS: Record<TransactionCategory, string> = {
-  Alimentação: "#f97316",
-  Transporte: "#3b82f6",
-  Moradia: "#8b5cf6",
-  Lazer: "#ec4899",
-  Saúde: "#ef4444",
-  Educação: "#eab308",
-  Salário: "#22c55e",
-  Freelance: "#14b8a6",
-  Outros: "#64748b",
+  Alimentação: "#2a78d6", // blue
+  Transporte: "#eb6834", // orange
+  Moradia: "#1baf7a", // aqua
+  Lazer: "#eda100", // yellow
+  Saúde: "#e87ba4", // magenta
+  Educação: "#008300", // green
+  Salário: "#4a3aa7", // violet
+  Freelance: "#e34948", // red
+  Outros: "#8a8a86", // neutro
 };
