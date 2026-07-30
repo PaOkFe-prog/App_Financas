@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { logout } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
+import { MobileNav } from "@/components/layout/mobile-nav";
 
 export default async function AppLayout({
   children,
@@ -26,8 +27,11 @@ export default async function AppLayout({
       </aside>
 
       <div className="flex flex-col">
-        <header className="flex items-center justify-between border-b px-6 py-4">
-          <span className="font-semibold md:hidden">Finanças Pessoais</span>
+        <header className="flex items-center justify-between border-b px-4 py-4 md:px-6">
+          <div className="flex items-center gap-2 md:hidden">
+            <MobileNav />
+            <span className="font-semibold">Finanças Pessoais</span>
+          </div>
           <div className="ml-auto flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
               {user.email}

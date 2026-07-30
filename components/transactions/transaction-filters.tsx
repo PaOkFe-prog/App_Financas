@@ -17,6 +17,19 @@ import { MONTH_NAMES } from "@/lib/utils";
 const ALL = "all";
 const YEARS = Array.from({ length: 6 }, (_, i) => new Date().getFullYear() - i);
 
+const MONTH_ITEMS: Record<string, string> = {
+  [ALL]: "Todos os meses",
+  ...Object.fromEntries(MONTH_NAMES.map((name, index) => [String(index + 1), name])),
+};
+const YEAR_ITEMS: Record<string, string> = {
+  [ALL]: "Todos",
+  ...Object.fromEntries(YEARS.map((year) => [String(year), String(year)])),
+};
+const CATEGORY_ITEMS: Record<string, string> = {
+  [ALL]: "Todas as categorias",
+  ...Object.fromEntries(CATEGORIES.map((category) => [category, category])),
+};
+
 export function TransactionFilters() {
   const router = useRouter();
   const pathname = usePathname();
@@ -52,6 +65,7 @@ export function TransactionFilters() {
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="filter-month">Mês</Label>
         <Select
+          items={MONTH_ITEMS}
           value={searchParams.get("month") ?? ALL}
           onValueChange={(value) => updateParam("month", value)}
         >
@@ -72,6 +86,7 @@ export function TransactionFilters() {
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="filter-year">Ano</Label>
         <Select
+          items={YEAR_ITEMS}
           value={searchParams.get("year") ?? ALL}
           onValueChange={(value) => updateParam("year", value)}
         >
@@ -92,6 +107,7 @@ export function TransactionFilters() {
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="filter-category">Categoria</Label>
         <Select
+          items={CATEGORY_ITEMS}
           value={searchParams.get("category") ?? ALL}
           onValueChange={(value) => updateParam("category", value)}
         >

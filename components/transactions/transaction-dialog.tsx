@@ -37,6 +37,11 @@ interface TransactionDialogProps {
 
 const initialState: TransactionFormState = undefined;
 
+const TYPE_ITEMS = { receita: "Receita", despesa: "Despesa" };
+const CATEGORY_ITEMS = Object.fromEntries(
+  CATEGORIES.map((category) => [category, category])
+);
+
 export function TransactionDialog({
   transaction,
   trigger,
@@ -116,6 +121,7 @@ export function TransactionDialog({
               <Label htmlFor="type">Tipo</Label>
               <Select
                 name="type"
+                items={TYPE_ITEMS}
                 defaultValue={transaction?.type ?? "despesa"}
               >
                 <SelectTrigger id="type" className="w-full">
@@ -131,6 +137,7 @@ export function TransactionDialog({
               <Label htmlFor="category">Categoria</Label>
               <Select
                 name="category"
+                items={CATEGORY_ITEMS}
                 defaultValue={transaction?.category ?? CATEGORIES[0]}
               >
                 <SelectTrigger id="category" className="w-full">
