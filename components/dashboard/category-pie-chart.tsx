@@ -27,9 +27,10 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
           nameKey="category"
           innerRadius={0}
           outerRadius={100}
-          paddingAngle={1}
+          paddingAngle={data.length > 1 ? 1 : 0}
           stroke="var(--background)"
           strokeWidth={2}
+          isAnimationActive={false}
         >
           {data.map((entry) => (
             <Cell
@@ -45,7 +46,10 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
         <Legend
           verticalAlign="bottom"
           height={36}
-          wrapperStyle={{ fontSize: 13, color: "var(--muted-foreground)" }}
+          wrapperStyle={{ fontSize: 13 }}
+          formatter={(value) => (
+            <span className="text-muted-foreground">{value}</span>
+          )}
         />
       </PieChart>
     </ResponsiveContainer>
