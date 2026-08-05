@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { AuthSchema } from "@/lib/validations/auth";
 
 export type AuthFormState =
-  | { error?: string; message?: string }
+  | { error?: string; message?: string; email?: string }
   | undefined;
 
 export async function login(
@@ -54,6 +54,7 @@ export async function signup(
   if (!data.session) {
     return {
       message: "Cadastro realizado! Confirme seu e-mail para poder entrar.",
+      email: parsed.data.email,
     };
   }
 

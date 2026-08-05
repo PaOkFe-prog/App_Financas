@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { MailCheck } from "lucide-react";
 import { signup } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,39 @@ import {
 
 export default function SignupPage() {
   const [state, formAction, pending] = useActionState(signup, undefined);
+
+  if (state?.message) {
+    return (
+      <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="items-center gap-2 text-center">
+            <MailCheck className="size-10 text-primary" />
+            <CardTitle className="text-xl">Confirme seu e-mail</CardTitle>
+            <CardDescription>
+              Enviamos um link de confirmação para{" "}
+              {state.email ? (
+                <span className="font-medium text-foreground">
+                  {state.email}
+                </span>
+              ) : (
+                "o e-mail informado"
+              )}
+              . Abra sua caixa de entrada (e a pasta de spam, por garantia) e
+              clique no link para ativar sua conta antes de entrar.
+            </CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Button
+              variant="outline"
+              className="w-full"
+              nativeButton={false}
+              render={<Link href="/login">Ir para o login</Link>}
+            />
+          </CardFooter>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
@@ -48,9 +82,6 @@ export default function SignupPage() {
             </div>
             {state?.error && (
               <p className="text-sm text-destructive">{state.error}</p>
-            )}
-            {state?.message && (
-              <p className="text-sm text-emerald-600">{state.message}</p>
             )}
           </CardContent>
           <CardFooter className="flex flex-col gap-4">

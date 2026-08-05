@@ -1,7 +1,8 @@
 "use client";
 
+import { useTheme } from "next-themes";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { CATEGORY_COLORS } from "@/lib/categories";
+import { CATEGORY_COLORS, CATEGORY_COLORS_DARK } from "@/lib/categories";
 import { formatCurrency } from "@/lib/utils";
 import type { TransactionCategory } from "@/types/transaction";
 
@@ -10,6 +11,9 @@ interface CategoryPieChartProps {
 }
 
 export function CategoryPieChart({ data }: CategoryPieChartProps) {
+  const { resolvedTheme } = useTheme();
+  const colors = resolvedTheme === "dark" ? CATEGORY_COLORS_DARK : CATEGORY_COLORS;
+
   if (data.length === 0) {
     return (
       <div className="flex h-[280px] items-center justify-center text-sm text-muted-foreground">
@@ -36,8 +40,8 @@ export function CategoryPieChart({ data }: CategoryPieChartProps) {
             <Cell
               key={entry.category}
               fill={
-                CATEGORY_COLORS[entry.category as TransactionCategory] ??
-                CATEGORY_COLORS.Outros
+                colors[entry.category as TransactionCategory] ??
+                colors.Outros
               }
             />
           ))}

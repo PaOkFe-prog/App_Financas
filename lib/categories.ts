@@ -26,3 +26,16 @@ export const CATEGORY_COLORS: Record<TransactionCategory, string> = {
   Freelance: "#e34948", // red
   Outros: "#8a8a86", // neutro
 };
+
+// Mesmos matizes, ajustados (steps) para contraste no fundo escuro.
+export const CATEGORY_COLORS_DARK: Record<TransactionCategory, string> = {
+  Alimentação: "#3987e5",
+  Transporte: "#d95926",
+  Moradia: "#199e70",
+  Lazer: "#c98500",
+  Saúde: "#d55181",
+  Educação: "#008300",
+  Salário: "#9085e9",
+  Freelance: "#e66767",
+  Outros: "#a1a1aa",
+};

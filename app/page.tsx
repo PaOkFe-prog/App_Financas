@@ -10,6 +10,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 const FEATURES = [
   {
@@ -53,6 +54,7 @@ export default async function LandingPage() {
       <header className="flex items-center justify-between border-b px-6 py-4">
         <span className="font-semibold">Finanças Pessoais</span>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Button
             variant="ghost"
             nativeButton={false}
