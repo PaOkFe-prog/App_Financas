@@ -20,22 +20,32 @@ interface CashFlowWaterfallProps {
 }
 
 const COLORS = {
-  light: { increase: "#059669", decrease: "#dc2626", total: "#2a78d6" },
-  dark: { increase: "#10b981", decrease: "#ef4444", total: "#3987e5" },
+  light: {
+    opening: "#2a78d6",
+    increase: "#059669",
+    decrease: "#dc2626",
+    closing: "#71717a",
+  },
+  dark: {
+    opening: "#3987e5",
+    increase: "#10b981",
+    decrease: "#ef4444",
+    closing: "#a1a1aa",
+  },
 };
 
-function colorFor(step: WaterfallStep, colors: typeof COLORS.light) {
-  if (step.type === "total") {
-    return step.displayValue < 0 ? colors.decrease : colors.total;
-  }
-  return colors[step.type];
-}
+const LEGEND: { type: keyof typeof COLORS.light; label: string }[] = [
+  { type: "opening", label: "Saldo inicial" },
+  { type: "increase", label: "Entradas" },
+  { type: "decrease", label: "Saídas" },
+  { type: "closing", label: "Saldo final" },
+];
 
 export function CashFlowWaterfall({ steps }: CashFlowWaterfallProps) {
   const { resolvedTheme } = useTheme();
   const colors = resolvedTheme === "dark" ? COLORS.dark : COLORS.light;
 
-  const isEmpty = steps.every((step) => step.value === 0);
+  const isEmpty = steps.every((step) => step.range[0] === step.range[1]);
   if (isEmpty) {
     return (
       <div className="flex h-[320px] items-center justify-center text-sm text-muted-foreground">
@@ -76,15 +86,9 @@ export function CashFlowWaterfall({ steps }: CashFlowWaterfallProps) {
             }}
             cursor={{ fill: "var(--muted)", opacity: 0.4 }}
           />
-          <Bar
-            dataKey="base"
-            stackId="waterfall"
-            fill="transparent"
-            isAnimationActive={false}
-          />
-          <Bar dataKey="value" stackId="waterfall" radius={[4, 4, 0, 0]} isAnimationActive={false}>
+          <Bar dataKey="range" radius={[4, 4, 4, 4]} isAnimationActive={false}>
             {steps.map((step) => (
-              <Cell key={step.label} fill={colorFor(step, colors)} />
+              <Cell key={step.label} fill={colors[step.type]} />
             ))}
             <LabelList
               dataKey="displayValue"
@@ -97,27 +101,15 @@ export function CashFlowWaterfall({ steps }: CashFlowWaterfallProps) {
       </ResponsiveContainer>
 
       <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span
-            className="size-2.5 rounded-sm"
-            style={{ backgroundColor: colors.increase }}
-          />
-          Entradas
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span
-            className="size-2.5 rounded-sm"
-            style={{ backgroundColor: colors.decrease }}
-          />
-          Saídas / saldo negativo
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span
-            className="size-2.5 rounded-sm"
-            style={{ backgroundColor: colors.total }}
-          />
-          Saldo positivo
-        </span>
+        {LEGEND.map(({ type, label }) => (
+          <span key={type} className="flex items-center gap-1.5">
+            <span
+              className="size-2.5 rounded-sm"
+              style={{ backgroundColor: colors[type] }}
+            />
+            {label}
+          </span>
+        ))}
       </div>
     </div>
   );

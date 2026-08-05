@@ -3,22 +3,37 @@ import type { MonthlyNet } from "@/lib/data/transactions";
 
 export interface WaterfallStep {
   label: string;
-  /** Ponto de partida (invisível) da barra empilhada. */
-  base: number;
-  /** Altura visível da barra — sempre um valor positivo (magnitude). */
-  value: number;
+  /** Intervalo [início, fim] no eixo de valores — funciona com qualquer sinal. */
+  range: [number, number];
   /** Valor real com sinal, usado no rótulo e no tooltip. */
   displayValue: number;
-  type: "increase" | "decrease" | "total";
+  type: "opening" | "increase" | "decrease" | "closing";
 }
 
-function totalStep(label: string, amount: number): WaterfallStep {
+function pointStep(
+  label: string,
+  amount: number,
+  type: "opening" | "closing"
+): WaterfallStep {
   return {
     label,
-    base: Math.min(0, amount),
-    value: Math.abs(amount),
+    range: [Math.min(0, amount), Math.max(0, amount)],
     displayValue: amount,
-    type: "total",
+    type,
+  };
+}
+
+function rangeStep(
+  label: string,
+  from: number,
+  to: number,
+  type: "increase" | "decrease"
+): WaterfallStep {
+  return {
+    label,
+    range: [Math.min(from, to), Math.max(from, to)],
+    displayValue: to - from,
+    type,
   };
 }
 
@@ -32,33 +47,23 @@ export function buildMonthlyWaterfall(
   income: number,
   byCategory: { category: string; total: number }[]
 ): WaterfallStep[] {
-  const steps: WaterfallStep[] = [totalStep("Saldo inicial", openingBalance)];
+  const steps: WaterfallStep[] = [
+    pointStep("Saldo inicial", openingBalance, "opening"),
+  ];
 
   let running = openingBalance;
 
-  steps.push({
-    label: "Receitas",
-    base: running,
-    value: income,
-    displayValue: income,
-    type: "increase",
-  });
+  steps.push(rangeStep("Receitas", running, running + income, "increase"));
   running += income;
 
   const sorted = [...byCategory].sort((a, b) => b.total - a.total);
   for (const { category, total } of sorted) {
-    const newRunning = running - total;
-    steps.push({
-      label: category,
-      base: newRunning,
-      value: total,
-      displayValue: -total,
-      type: "decrease",
-    });
-    running = newRunning;
+    const next = running - total;
+    steps.push(rangeStep(category, running, next, "decrease"));
+    running = next;
   }
 
-  steps.push(totalStep("Saldo final", running));
+  steps.push(pointStep("Saldo final", running, "closing"));
   return steps;
 }
 
@@ -70,21 +75,19 @@ export function buildYearlyWaterfall(
   openingBalance: number,
   monthly: MonthlyNet[]
 ): WaterfallStep[] {
-  const steps: WaterfallStep[] = [totalStep("Saldo inicial", openingBalance)];
+  const steps: WaterfallStep[] = [
+    pointStep("Saldo inicial", openingBalance, "opening"),
+  ];
 
   let running = openingBalance;
   for (const { month, net } of monthly) {
-    const newRunning = running + net;
-    steps.push({
-      label: MONTH_ABBR[month - 1],
-      base: net >= 0 ? running : newRunning,
-      value: Math.abs(net),
-      displayValue: net,
-      type: net >= 0 ? "increase" : "decrease",
-    });
-    running = newRunning;
+    const next = running + net;
+    steps.push(
+      rangeStep(MONTH_ABBR[month - 1], running, next, net >= 0 ? "increase" : "decrease")
+    );
+    running = next;
   }
 
-  steps.push(totalStep("Saldo final", running));
+  steps.push(pointStep("Saldo final", running, "closing"));
   return steps;
 }
