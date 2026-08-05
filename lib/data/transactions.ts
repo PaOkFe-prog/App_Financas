@@ -71,10 +71,9 @@ export interface DashboardSummary {
 }
 
 export async function getDashboardSummary(
-  month: number,
-  year: number
+  filters: TransactionFilters
 ): Promise<DashboardSummary> {
-  const transactions = await getTransactions({ month, year });
+  const transactions = await getTransactions(filters);
 
   let income = 0;
   let expense = 0;
