@@ -1,10 +1,15 @@
-import { getDashboardSummary } from "@/lib/data/transactions";
+import {
+  getDashboardSummary,
+  getCumulativeBalance,
+  getMonthlyBreakdown,
+} from "@/lib/data/transactions";
+import { buildMonthlyWaterfall, buildYearlyWaterfall } from "@/lib/waterfall";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
 import { CashFlowWaterfall } from "@/components/dashboard/cash-flow-waterfall";
 import { DashboardFilters } from "@/components/dashboard/dashboard-filters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ALL_FILTER_VALUE } from "@/lib/filter-items";
-import { MONTH_NAMES } from "@/lib/utils";
+import { MONTH_NAMES, pad } from "@/lib/utils";
 import type { TransactionCategory } from "@/types/transaction";
 
 interface DashboardPageProps {
@@ -43,6 +48,21 @@ export default async function DashboardPage({
 
   const summary = await getDashboardSummary({ month, year, category });
 
+  const effectiveYear = year ?? now.getFullYear();
+  const waterfallSteps = month
+    ? buildMonthlyWaterfall(
+        await getCumulativeBalance(
+          `${effectiveYear}-${pad(month)}-01`,
+          category
+        ),
+        summary.income,
+        summary.byCategory
+      )
+    : buildYearlyWaterfall(
+        await getCumulativeBalance(`${effectiveYear}-01-01`, category),
+        await getMonthlyBreakdown(effectiveYear, category)
+      );
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -66,11 +86,7 @@ export default async function DashboardPage({
           <CardTitle>Fluxo de caixa</CardTitle>
         </CardHeader>
         <CardContent>
-          <CashFlowWaterfall
-            income={summary.income}
-            byCategory={summary.byCategory}
-            balance={summary.balance}
-          />
+          <CashFlowWaterfall steps={waterfallSteps} />
         </CardContent>
       </Card>
     </div>

@@ -13,22 +13,10 @@ import {
   YAxis,
 } from "recharts";
 import { formatCurrency } from "@/lib/utils";
+import type { WaterfallStep } from "@/lib/waterfall";
 
 interface CashFlowWaterfallProps {
-  income: number;
-  byCategory: { category: string; total: number }[];
-  balance: number;
-}
-
-interface WaterfallStep {
-  label: string;
-  /** Ponto de partida (invisível) da barra empilhada. */
-  base: number;
-  /** Altura visível da barra — sempre um valor positivo (magnitude). */
-  value: number;
-  /** Valor real com sinal, usado no rótulo e no tooltip. */
-  displayValue: number;
-  type: "increase" | "decrease" | "total";
+  steps: WaterfallStep[];
 }
 
 const COLORS = {
@@ -36,56 +24,25 @@ const COLORS = {
   dark: { increase: "#10b981", decrease: "#ef4444", total: "#3987e5" },
 };
 
-function buildSteps(
-  income: number,
-  byCategory: { category: string; total: number }[],
-  balance: number
-): WaterfallStep[] {
-  const steps: WaterfallStep[] = [
-    { label: "Receitas", base: 0, value: income, displayValue: income, type: "increase" },
-  ];
-
-  let running = income;
-  const sorted = [...byCategory].sort((a, b) => b.total - a.total);
-  for (const { category, total } of sorted) {
-    const newRunning = running - total;
-    steps.push({
-      label: category,
-      base: newRunning,
-      value: total,
-      displayValue: -total,
-      type: "decrease",
-    });
-    running = newRunning;
+function colorFor(step: WaterfallStep, colors: typeof COLORS.light) {
+  if (step.type === "total") {
+    return step.displayValue < 0 ? colors.decrease : colors.total;
   }
-
-  steps.push({
-    label: "Saldo",
-    base: Math.min(0, balance),
-    value: Math.abs(balance),
-    displayValue: balance,
-    type: "total",
-  });
-  return steps;
+  return colors[step.type];
 }
 
-export function CashFlowWaterfall({
-  income,
-  byCategory,
-  balance,
-}: CashFlowWaterfallProps) {
+export function CashFlowWaterfall({ steps }: CashFlowWaterfallProps) {
   const { resolvedTheme } = useTheme();
   const colors = resolvedTheme === "dark" ? COLORS.dark : COLORS.light;
 
-  if (income === 0 && byCategory.length === 0) {
+  const isEmpty = steps.every((step) => step.value === 0);
+  if (isEmpty) {
     return (
       <div className="flex h-[320px] items-center justify-center text-sm text-muted-foreground">
         Nenhuma movimentação registrada neste período.
       </div>
     );
   }
-
-  const steps = buildSteps(income, byCategory, balance);
 
   return (
     <div className="flex flex-col gap-3">
@@ -101,9 +58,9 @@ export function CashFlowWaterfall({
             tickLine={false}
             axisLine={{ stroke: "var(--border)" }}
             interval={0}
-            angle={steps.length > 5 ? -20 : 0}
+            angle={steps.length > 5 ? -35 : 0}
             textAnchor={steps.length > 5 ? "end" : "middle"}
-            height={steps.length > 5 ? 50 : 30}
+            height={steps.length > 5 ? 55 : 30}
           />
           <YAxis
             tickFormatter={(value) => formatCurrency(Number(value))}
@@ -127,7 +84,7 @@ export function CashFlowWaterfall({
           />
           <Bar dataKey="value" stackId="waterfall" radius={[4, 4, 0, 0]} isAnimationActive={false}>
             {steps.map((step) => (
-              <Cell key={step.label} fill={colors[step.type]} />
+              <Cell key={step.label} fill={colorFor(step, colors)} />
             ))}
             <LabelList
               dataKey="displayValue"
@@ -152,14 +109,14 @@ export function CashFlowWaterfall({
             className="size-2.5 rounded-sm"
             style={{ backgroundColor: colors.decrease }}
           />
-          Saídas por categoria
+          Saídas / saldo negativo
         </span>
         <span className="flex items-center gap-1.5">
           <span
             className="size-2.5 rounded-sm"
             style={{ backgroundColor: colors.total }}
           />
-          Saldo final
+          Saldo positivo
         </span>
       </div>
     </div>

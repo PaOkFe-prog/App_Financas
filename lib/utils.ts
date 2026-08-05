@@ -32,3 +32,22 @@ export const MONTH_NAMES = [
   "Novembro",
   "Dezembro",
 ]
+
+export const MONTH_ABBR = [
+  "Jan",
+  "Fev",
+  "Mar",
+  "Abr",
+  "Mai",
+  "Jun",
+  "Jul",
+  "Ago",
+  "Set",
+  "Out",
+  "Nov",
+  "Dez",
+]
+
+export function pad(value: number) {
+  return String(value).padStart(2, "0")
+}
